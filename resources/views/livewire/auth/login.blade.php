@@ -26,22 +26,46 @@ new #[Layout('components.layouts.auth')] class extends Component {
     public function login(): void
     {
         $this->validate();
-
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt(['email' => $this->email, 'password' => $this->password], $this->remember)) {
-            RateLimiter::hit($this->throttleKey());
+        // Find persona by email
+        $persona = \App\Models\Persona::where('email', $this->email)->first();
 
+        if (!$persona) {
+            RateLimiter::hit($this->throttleKey());
+            throw ValidationException::withMessages([
+                'email' => __('auth.failed'),
+            ]);
+        }
+
+        // Find usuario by persona_id
+        $usuario = \App\Models\Usuario::where('persona_id', $persona->id)->first();
+
+        if (!$usuario) {
+            RateLimiter::hit($this->throttleKey());
+            throw ValidationException::withMessages([
+                'email' => __('auth.failed'),
+            ]);
+        }
+
+        // Verify password
+        if (!\Illuminate\Support\Facades\Hash::check($this->password, $usuario->password)) {
+            RateLimiter::hit($this->throttleKey());
             throw ValidationException::withMessages([
                 'email' => __('auth.failed'),
             ]);
         }
 
         RateLimiter::clear($this->throttleKey());
-        Session::regenerate();
+        \Illuminate\Support\Facades\Session::regenerate();
 
+        // Log the usuario in
+        \Illuminate\Support\Facades\Auth::login($usuario, $this->remember);
+
+        // Redirect to dashboard
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
+
 
     /**
      * Ensure the authentication request is not rate limited.
