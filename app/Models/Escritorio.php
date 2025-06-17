@@ -13,7 +13,7 @@ class Escritorio extends Model
 
     protected $fillable = [
         'nombre_escritorio',
-        'area'
+        'area_id'
     ];
 
     public function area()

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('username')->unique();
             $table->string('password');
             $table->foreignId('area_id')->constrained('areas')->onDelete('cascade');
+            $table->enum('status', ['enabled', 'disabled'])->default('enabled');
             
         });
     }

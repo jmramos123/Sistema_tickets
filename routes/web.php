@@ -2,6 +2,27 @@
 
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
+use App\Livewire\UserManagement;
+use App\Livewire\AreaManagement;
+use App\Livewire\EscritorioManagement;
+use App\Livewire\TicketManagement;
+
+Route::middleware(['auth', 'role:admin|empleado'])->group(function() {
+    Route::get('/admin/tickets', TicketManagement::class)->name('tickets.index');
+});
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/escritorios', EscritorioManagement::class)->name('admin.escritorios');
+});
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/areas', AreaManagement::class)->name('areas.index');
+});
+
+Route::middleware(['auth', 'role:admin'])->group(function () {
+    Route::get('/admin/users', UserManagement::class)->name('admin.users');
+});
+
 
 Route::get('/', function () {
     return view('welcome');
