@@ -22,7 +22,8 @@ class Usuario extends Authenticatable
         'persona_id',
         'username',
         'password',
-        'area_id'
+        'area_id',
+        'status'
     ];
 
     protected $hidden = [

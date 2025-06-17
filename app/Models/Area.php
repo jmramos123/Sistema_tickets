@@ -19,7 +19,7 @@ class Area extends Model
 
     public function escritorios()
     {
-        return this->hasMany(Escritorio::class, 'area_id');
+        return $this->hasMany(Escritorio::class, 'area_id');
     }
 
     public function tickets()
