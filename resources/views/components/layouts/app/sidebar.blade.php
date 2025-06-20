@@ -3,7 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}"> <!-- Add this line -->
     <title>{{ $title ?? 'Panel de Administración' }}</title>
+    
 
     {{-- Bootstrap --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -67,6 +69,11 @@
                 </a>
             </li>
             <li>
+                <a href="{{ route('videos.index') }}" class="nav-link {{ request()->routeIs('videos.index') ? 'active' : '' }}">
+                    Videos
+                </a>
+            </li>
+            <li>
                 <a href="{{ route('tickets.index') }}" class="nav-link {{ request()->routeIs('tickets.index') ? 'active' : '' }}">
                     Tickets
                 </a>
@@ -97,7 +104,23 @@
 
     {{-- Scripts --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="//unpkg.com/alpinejs" defer></script>
+    <script>
+        document.addEventListener('livewire:init', () => {
+            Livewire.hook('upload.start', (file) => {
+                if (!file) return;
+            
+            // Ensure file has name property
+                if (!file.name && file.file) {
+                    file.name = file.file.name;
+                }
+            
+            // Fallback name generation
+                if (!file.name) {
+                    file.name = 'video_' + Date.now() + '.mp4';
+                }
+        });
+        });
+    </script>
     @livewireScripts
 
 </body>
