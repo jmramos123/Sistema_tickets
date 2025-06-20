@@ -6,6 +6,13 @@ use App\Livewire\UserManagement;
 use App\Livewire\AreaManagement;
 use App\Livewire\EscritorioManagement;
 use App\Livewire\TicketManagement;
+use App\Livewire\VideoManagement;
+use App\Http\Controllers\VideoUploadController;
+
+
+Route::middleware(['auth', 'role:admin'])->group(function() {
+    Route::get('/admin/videos', VideoManagement::class)->name('videos.index');
+});
 
 Route::middleware(['auth', 'role:admin|empleado'])->group(function() {
     Route::get('/admin/tickets', TicketManagement::class)->name('tickets.index');
@@ -41,3 +48,8 @@ Route::middleware(['auth'])->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+// Add this route
+Route::get('/videos', VideoManagement::class)->name('videos.index');
+Route::post('/video/upload', [VideoUploadController::class, 'upload'])->name('video.upload');
+
