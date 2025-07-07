@@ -23,6 +23,6 @@ class Escritorio extends Model
 
     public function llamadas()
     {
-        return $this->hasMany(Llamadas::class, 'escritorio_id');
+        return $this->hasMany(Llamada::class, 'escritorio_id');
     }
 }

@@ -3,108 +3,152 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Models\Ticket;
-use App\Models\Area;
+use App\Models\Llamada;
+use Carbon\Carbon;
 
 class TicketManagement extends Component
 {
-    public $tickets;
-    public $areas;
-    public $selectedArea;
-    public $es_adulto_mayor = false;
+    public $topDesks = [];
+    public $topEmployees = [];
+    public $topAreas = [];
+    public $waitAvgSeconds = 0;
+    public $attentionAvgSeconds = 0;
+    public $filteredTotal = 0;
+    public $startDate;
+    public $endDate;
+    public $ticketType = 'all'; // all | normal | adulto_mayor
 
-    public $currentTicket = null;
+    public $chartLabels = [];
+    public $chartCounts = [];
 
     public function mount()
     {
-        $this->areas = Area::all();
-        $this->loadTickets();
+        $this->startDate = Carbon::today()->toDateString();
+        $this->endDate   = Carbon::today()->toDateString();
+        $this->fetchChartData();
     }
 
-    public function loadTickets()
+    public function updated($property)
     {
-        $this->tickets = Ticket::where('estado', 'pendiente')
-            ->orderByDesc('es_adulto_mayor')
-            ->orderBy('created_at')
-            ->get();
+        if (in_array($property, ['startDate', 'endDate', 'ticketType'])) {
+            $this->fetchChartData();
+            logger("📥 updated() called: $property");
+            $this->dispatch('updatedFilters');
+        }
     }
 
-    public function generateNumero()
+    protected function fetchChartData()
     {
-        // Get last numero for selected area
-        $lastTicket = Ticket::where('area_id', $this->selectedArea)
-            ->latest('numero')
-            ->first();
+        $labels = [];
+        $counts = [];
 
-        return $lastTicket ? $lastTicket->numero + 1 : 1;
-    }
+        $waitTimes = [];
+        $attentionTimes = [];
 
-    public function createTicket()
-    {
-        $this->validate([
-            'selectedArea' => 'required|exists:areas,id',
-            'es_adulto_mayor' => 'boolean',
+        $start = Carbon::parse($this->startDate)->startOfDay();
+        $end = Carbon::parse($this->endDate)->endOfDay();
+
+        $period = $start->daysUntil($end);
+
+        foreach ($period as $date) {
+            $labels[] = $date->format('Y-m-d');
+
+            $query = Llamada::whereDate('llamado_en', $date);
+
+            if ($this->ticketType === 'adulto_mayor') {
+                $query->where('es_adulto_mayor', 1);
+            } elseif ($this->ticketType === 'normal') {
+                $query->where('es_adulto_mayor', 0);
+            }
+
+            $llamadas = $query->get();
+            $counts[] = $llamadas->count();
+
+            foreach ($llamadas as $llamada) {
+                if ($llamada->llamado_en && $llamada->atendido_en) {
+                    $waitSecs = abs(Carbon::parse($llamada->atendido_en)->diffInSeconds(Carbon::parse($llamada->llamado_en), false));
+                    $waitTimes[] = $waitSecs;
+                }
+                if ($llamada->created_at && $llamada->updated_at) {
+                    $attentionSecs = abs(Carbon::parse($llamada->updated_at)->diffInSeconds(Carbon::parse($llamada->created_at), false));
+                    $attentionTimes[] = $attentionSecs;
+                }
+            }
+        }
+
+        $this->filteredTotal = array_sum($counts);
+        $this->chartLabels = $labels;
+        $this->chartCounts = $counts;
+        $this->waitAvgSeconds = count($waitTimes) ? round(array_sum($waitTimes) / count($waitTimes), 2) : 0;
+        $this->attentionAvgSeconds = count($attentionTimes) ? round(array_sum($attentionTimes) / count($attentionTimes), 2) : 0;
+
+        // 🚀 Top 3 Escritorios by name
+        $deskQuery = Llamada::selectRaw('escritorios.nombre_escritorio, COUNT(*) as total')
+            ->join('escritorios', 'llamadas.escritorio_id', '=', 'escritorios.id')
+            ->whereBetween('llamado_en', [$start, $end]);
+
+        if ($this->ticketType === 'adulto_mayor') {
+            $deskQuery->where('es_adulto_mayor', 1);
+        } elseif ($this->ticketType === 'normal') {
+            $deskQuery->where('es_adulto_mayor', 0);
+        }
+
+        $this->topDesks = $deskQuery->groupBy('escritorios.nombre_escritorio')
+            ->orderByDesc('total')
+            ->limit(3)
+            ->pluck('total', 'escritorios.nombre_escritorio')
+            ->toArray();
+
+        // 🚀 Top 3 Empleados by full name
+        $employeeQuery = Llamada::selectRaw("CONCAT(personas.nombre, ' ', personas.apellido) as empleado, COUNT(*) as total")
+            ->join('usuarios', 'llamadas.usuario_id', '=', 'usuarios.id')
+            ->join('personas', 'usuarios.persona_id', '=', 'personas.id')
+            ->whereBetween('llamado_en', [$start, $end]);
+
+        if ($this->ticketType === 'adulto_mayor') {
+            $employeeQuery->where('es_adulto_mayor', 1);
+        } elseif ($this->ticketType === 'normal') {
+            $employeeQuery->where('es_adulto_mayor', 0);
+        }
+
+        $this->topEmployees = $employeeQuery->groupBy('empleado')
+            ->orderByDesc('total')
+            ->limit(3)
+            ->pluck('total', 'empleado')
+            ->toArray();
+
+        // 🚀 Top 3 Áreas by name
+        $areaQuery = Llamada::selectRaw('areas.nombre_area, COUNT(*) as total')
+            ->join('escritorios', 'llamadas.escritorio_id', '=', 'escritorios.id')
+            ->join('areas', 'escritorios.area_id', '=', 'areas.id')
+            ->whereBetween('llamado_en', [$start, $end]);
+
+        if ($this->ticketType === 'adulto_mayor') {
+            $areaQuery->where('es_adulto_mayor', 1);
+        } elseif ($this->ticketType === 'normal') {
+            $areaQuery->where('es_adulto_mayor', 0);
+        }
+
+        $this->topAreas = $areaQuery->groupBy('areas.nombre_area')
+            ->orderByDesc('total')
+            ->limit(3)
+            ->pluck('total', 'areas.nombre_area')
+            ->toArray();
+
+        logger()->debug('✅ Chart + Top Data', [
+            'labels' => $labels,
+            'counts' => $counts,
+            'wait_avg_secs' => $this->waitAvgSeconds,
+            'attention_avg_secs' => $this->attentionAvgSeconds,
+            'top_desks' => $this->topDesks,
+            'top_employees' => $this->topEmployees,
+            'top_areas' => $this->topAreas
         ]);
-
-        $numero = $this->generateNumero();
-
-        Ticket::create([
-            'area_id' => $this->selectedArea,
-            'numero' => $numero,
-            'es_adulto_mayor' => $this->es_adulto_mayor,
-            'estado' => 'pendiente',
-        ]);
-
-        session()->flash('message', "Ticket #$numero generado correctamente.");
-
-        $this->selectedArea = null;
-        $this->es_adulto_mayor = false;
-
-        $this->loadTickets();
     }
 
-    public function callNextTicket()
-    {
-        $nextTicket = Ticket::where('estado', 'pendiente')
-            ->orderByDesc('es_adulto_mayor')
-            ->orderBy('created_at')
-            ->first();
-
-        if (!$nextTicket) {
-            session()->flash('message', 'No hay tickets pendientes.');
-            return;
-        }
-
-        if ($this->currentTicket) {
-            $this->currentTicket->estado = 'atendido';
-            $this->currentTicket->save();
-        }
-
-        $nextTicket->estado = 'llamado';
-        $nextTicket->save();
-
-        $this->currentTicket = $nextTicket;
-
-        $this->loadTickets();
+    function renderChart() {
+        // ...
     }
-
-    public function markAttended()
-    {
-        if (!$this->currentTicket) {
-            session()->flash('message', 'No hay ticket en proceso.');
-            return;
-        }
-
-        $this->currentTicket->estado = 'atendido';
-        $this->currentTicket->save();
-
-        $this->currentTicket = null;
-
-        $this->loadTickets();
-
-        session()->flash('message', 'Ticket atendido correctamente.');
-    }
-
     public function render()
     {
         return view('livewire.ticket-management');
