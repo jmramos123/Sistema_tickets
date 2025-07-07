@@ -13,13 +13,22 @@ class Llamada extends Model
 
     protected $fillable = [
         'ticket_id',
+        'es_adulto_mayor',
         'escritorio_id',
+        'usuario_id',
         'llamado_en',
         'atendido_en',
         'intentos'
     ];
 
-    public $timestamps = false;
+    protected $casts = [
+        'llamado_en'  => 'datetime',
+        'atendido_en' => 'datetime',
+        'created_at'  => 'datetime',
+        'updated_at'  => 'datetime',
+    ];
+
+    public $timestamps = true;
 
     public function ticket()
     {
@@ -28,6 +37,11 @@ class Llamada extends Model
 
     public function escritorio()
     {
-        return $this->belongsTo(Ticket::class, 'escritorio_id');
+        return $this->belongsTo(Escritorio::class, 'escritorio_id');
+    }
+
+    public function usuario()
+    {
+        return $this->belongsTo(User::class, 'usuario_id');
     }
 }

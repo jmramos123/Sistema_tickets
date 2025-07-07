@@ -14,7 +14,8 @@ return new class extends Migration
         Schema::create('tickets', function (Blueprint $table) {
             $table->id();
             $table->foreignId('area_id')->constrained('areas')->onDelete('cascade');
-            $table->string('numero');
+            $table->Integer('numero')->nullable;
+            $table->Integer('numero_adulto_mayor')->nullable;
             $table->boolean('es_adulto_mayor')->default(false);
             $table->string('estado');
             $table->timestamp('created_at')->useCurrent();
