@@ -1,69 +1,89 @@
 <div>
-    <h2>Gestión de Videos</h2>
+    <h2 class="mb-4 fw-bold">Gestión de Videos</h2>
 
     @if (session()->has('message'))
         <div class="alert alert-success">{{ session('message') }}</div>
     @endif
-    @if (session()->has('error'))
-        <div class="alert alert-danger">{{ session('error') }}</div>
-    @endif
 
-    <form id="video-upload-form" class="mb-4">
+    {{-- Video Upload Form --}}
+    <form id="video-upload-form" class="card card-body mb-4 shadow-sm">
         @csrf
         <div class="mb-3">
             <label class="form-label">Nombre del video</label>
-            <input type="text" id="video-name" name="nombre" class="form-control" placeholder="Nombre del video">
-            <div id="nombre-error" class="text-danger"></div>
+            <input type="text" id="video-name" name="nombre" class="form-control" placeholder="Ej: Publicidad 1">
+            <div id="nombre-error" class="text-danger small"></div>
         </div>
 
         <div class="mb-3">
             <label class="form-label">Archivo de video</label>
             <input type="file" name="videoFile" id="video-file-input" accept="video/*" class="form-control">
-            <div id="video-file-error" class="text-danger"></div>
-            
+            <div id="video-file-error" class="text-danger small"></div>
+
             <div class="mt-2" id="upload-progress-container" style="display:none">
                 <div class="progress">
                     <div class="progress-bar" role="progressbar" id="upload-progress-bar" style="width: 0%"></div>
                 </div>
-                <div class="text-center mt-1" id="upload-status">0%</div>
+                <div class="text-center mt-1 small" id="upload-status">0%</div>
             </div>
         </div>
-        
-        <button type="submit" class="btn btn-primary" id="upload-button">
-            Subir Video
+
+        <button type="submit" class="btn btn-primary">
+            📤 Subir Video
         </button>
     </form>
 
-    <h4>Lista de Videos</h4>
-    <table class="table table-bordered">
-        <thead>
+    {{-- Video List --}}
+    <h4 class="mb-3 fw-semibold">Lista de Videos</h4>
+
+    <table class="table table-hover table-bordered align-middle">
+        <thead class="table-light">
             <tr>
                 <th>Nombre</th>
                 <th>Archivo</th>
                 <th>Subido en</th>
+                <th>Estado</th>
                 <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
-            @foreach ($videos as $video)
+            @forelse ($videos as $video)
                 <tr>
                     <td>{{ $video->nombre }}</td>
                     <td>
-                        <a href="{{ asset('storage/' . $video->ruta_archivo) }}" target="_blank">Ver Video</a>
+                        <a href="{{ asset('storage/' . $video->ruta_archivo) }}" target="_blank" class="btn btn-sm btn-outline-primary">Ver Video</a>
                     </td>
                     <td>{{ $video->uploaded_at }}</td>
                     <td>
-                        <button wire:click="delete({{ $video->id }})" 
+                        @if($video->is_active)
+                            <span class="badge bg-success">Activo en TV</span>
+                        @else
+                            <span class="badge bg-secondary">Inactivo</span>
+                        @endif
+                    </td>
+                    <td>
+                        <button wire:click="delete({{ $video->id }})"
                                 onclick="return confirm('¿Eliminar este video?')"
                                 class="btn btn-danger btn-sm">
-                            Eliminar
+                            🗑️ Eliminar
                         </button>
+
+                        @if(!$video->is_active)
+                            <button wire:click="setAsActive({{ $video->id }})"
+                                    class="btn btn-outline-success btn-sm ms-1">
+                                📺 Enviar a TV
+                            </button>
+                        @endif
                     </td>
                 </tr>
-            @endforeach
+            @empty
+                <tr>
+                    <td colspan="5" class="text-center">Sin videos registrados.</td>
+                </tr>
+            @endforelse
         </tbody>
     </table>
 </div>
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
