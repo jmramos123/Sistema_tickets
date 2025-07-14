@@ -34,4 +34,9 @@ class Ticket extends Model
     {
         return $this->hasMany(Llamada::class, 'ticket_id');
     }
+    public function latestLlamada()
+    {
+        return $this->hasOne(Llamada::class, 'ticket_id')->latestOfMany();
+    }
+
 }

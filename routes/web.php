@@ -12,9 +12,10 @@ use App\Livewire\ClientTicket;
 use App\Livewire\TicketQueue;
 use App\Livewire\DeskSelection;
 use App\Livewire\Test;
+use App\Livewire\TvDisplay;
 
 
-
+Route::get('/tv', TvDisplay::class)->name('tv.display');
 Route::middleware(['auth', 'role:admin'])->group(function() {
     Route::get('/admin/videos', VideoManagement::class)->name('videos.index');
     Route::post('/video/upload', [VideoUploadController::class, 'upload'])->name('video.upload');

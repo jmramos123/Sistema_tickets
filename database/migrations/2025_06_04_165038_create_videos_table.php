@@ -16,6 +16,7 @@ return new class extends Migration
             $table->string('ruta_archivo');
             $table->string('nombre');
             $table->timestamp('uploaded_at')->useCurrent();
+            $table->boolean('is_active')->default(false); // ✅ added
             $table->timestamps();
         });
     }

@@ -25,4 +25,14 @@ class VideoManagement extends Component
         $video->delete();
         session()->flash('message', 'Video eliminado.');
     }
+    public function setAsActive($id)
+    {
+        Video::query()->update(['is_active' => false]); // Clear existing
+
+        $video = Video::findOrFail($id);
+        $video->is_active = true;
+        $video->save();
+
+        session()->flash('message', "Video '{$video->nombre}' seleccionado para la TV.");
+    }
 }

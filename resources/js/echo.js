@@ -1,20 +1,15 @@
-// resources/js/app.js
 import Echo from 'laravel-echo';
-import Pusher from 'pusher-js';
 
-/* Pusher.logToConsole = true;
- */
+import Pusher from 'pusher-js';
 window.Pusher = Pusher;
 
 window.Echo = new Echo({
-    broadcaster: 'pusher',
+    broadcaster: "pusher",
     key: import.meta.env.VITE_PUSHER_APP_KEY,
     cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+    forceTLS: true,
     wsHost: import.meta.env.VITE_PUSHER_HOST,
     wsPort: import.meta.env.VITE_PUSHER_PORT,
     wssPort: import.meta.env.VITE_PUSHER_PORT,
-    forceTLS: import.meta.env.VITE_PUSHER_SCHEME === 'https',
-    enabledTransports: ['ws', 'wss'],
-    disableStats: true // Optional: reduces other background traffic
-
+    enabledTransports: ["ws", "wss"],
 });

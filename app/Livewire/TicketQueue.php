@@ -8,6 +8,7 @@ use App\Models\Llamada;
 use App\Models\Area;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
+use App\Events\TicketCalled;
 use Carbon\Carbon;
 
 class TicketQueue extends Component
@@ -71,6 +72,8 @@ class TicketQueue extends Component
 
     public function llamar($ticketId)
     {
+        logger("LLAMAR fired for ticket ID: {$ticketId}");
+
         $ticket = Ticket::findOrFail($ticketId);
         $now = now();
 
@@ -80,10 +83,7 @@ class TicketQueue extends Component
             $llamada->escritorio_id    = $this->escritorioId;
             $llamada->usuario_id       = Auth::id();
             $llamada->es_adulto_mayor  = $ticket->es_adulto_mayor;
-
-            // ❌ Before: $llamada->llamado_en = $now;
-            // ✅ Correct: use ticket creation time
-            $llamada->llamado_en       = $ticket->created_at;
+            $llamada->llamado_en       = $ticket->created_at; // Or $now if you prefer
             $llamada->intentos         = 1;
         } else {
             $llamada->intentos++;
@@ -96,6 +96,9 @@ class TicketQueue extends Component
 
         $ticket->estado = 'llamado';
         $ticket->save();
+
+        logger("DISPATCHING TicketCalled broadcast for ticket ID: {$ticketId}");
+        event(new TicketCalled($ticketId));
 
         $this->loadTickets();
     }

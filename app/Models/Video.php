@@ -14,7 +14,8 @@ class Video extends Model
     protected $fillable = [
         'ruta_archivo',
         'nombre',
-        'uploaded_at'
+        'uploaded_at',
+        'is_active' // ✅ added
     ];
 
     public $timestamps = false;
