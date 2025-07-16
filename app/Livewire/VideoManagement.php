@@ -8,8 +8,20 @@ use Illuminate\Support\Facades\Storage;
 
 class VideoManagement extends Component
 {
+    public $confirmingVideoDeleteId = null;
+
     public $nombre;
     protected $listeners = ['videoUploaded' => '$refresh'];
+
+    public function confirmDelete($id)
+    {
+        $this->confirmingVideoDeleteId = $id;
+    }
+
+    public function cancelDelete()
+    {
+        $this->confirmingVideoDeleteId = null;
+    }
 
     public function render()
     {
@@ -24,7 +36,15 @@ class VideoManagement extends Component
         Storage::disk('public')->delete($video->ruta_archivo);
         $video->delete();
         session()->flash('message', 'Video eliminado.');
+
+        $this->confirmingVideoDeleteId = null;
     }
+    public function removeActive()
+    {
+        Video::query()->update(['is_active' => false]);
+        session()->flash('message', 'Se quitó el video activo de la TV.');
+    }
+
     public function setAsActive($id)
     {
         Video::query()->update(['is_active' => false]); // Clear existing

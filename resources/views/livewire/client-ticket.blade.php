@@ -4,18 +4,16 @@
     @if($step === 'selectArea')
         <h1 class="display-4 mb-3">Seleccione su Área</h1>
 
-        {{-- 2×2 grid with tighter gutters, only the name --}}
-        <div class="row w-100 gx-2 gy-2">
+        {{-- Vertical stack of full-width buttons --}}
+        <div class="w-100 d-flex flex-column gap-3">
             @foreach($areas as $area)
-                <div class="col-6">
-                    <button 
-                        wire:click="selectArea({{ $area->id }})"
-                        class="btn btn-outline-primary btn-lg w-100 h-100 d-flex align-items-center justify-content-center"
-                        style="min-height: 140px;"
-                    >
-                        <span class="fs-1">{{ $area->nombre_area }}</span>
-                    </button>
-                </div>
+                <button 
+                    wire:click="selectArea({{ $area->id }})"
+                    class="btn btn-outline-primary btn-lg w-100 d-flex align-items-center justify-content-center"
+                    style="min-height: 100px;"
+                >
+                    <span class="fs-2">{{ $area->nombre_area }}</span>
+                </button>
             @endforeach
         </div>
 

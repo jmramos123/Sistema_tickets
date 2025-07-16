@@ -11,7 +11,7 @@ use Livewire\Attributes\Layout;
 use Livewire\Attributes\Validate;
 use Livewire\Volt\Component;
 
-new #[Layout('components.layouts.auth')] class extends Component {
+new #[Layout('components.layouts.login')] class extends Component {
     #[Validate('required|string|email')]
     public string $email = '';
 
@@ -63,7 +63,13 @@ new #[Layout('components.layouts.auth')] class extends Component {
         \Illuminate\Support\Facades\Auth::login($usuario, $this->remember);
 
         // Redirect to dashboard
-        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+        if ($usuario->hasRole('empleado')) {
+            $this->redirect(route('user.selectDesk'), navigate: true);
+            return;
+        }
+
+        $this->redirect(route('dashboard'), navigate: true);
+
     }
 
 
@@ -97,55 +103,72 @@ new #[Layout('components.layouts.auth')] class extends Component {
     }
 }; ?>
 
-<div class="flex flex-col gap-6">
-    <x-auth-header :title="__('Log in to your account')" :description="__('Enter your email and password below to log in')" />
+<div class="login-box">
+  <div class="login-logo">
+    <a href="#"><b>Administración</b></a>
+  </div>
 
-    <!-- Session Status -->
-    <x-auth-session-status class="text-center" :status="session('status')" />
+  <div class="card">
+    <div class="card-body login-card-body">
+      <p class="login-box-msg">Inicia sesión para empezar tu sesión</p>
 
-    <form wire:submit="login" class="flex flex-col gap-6">
-        <!-- Email Address -->
-        <flux:input
-            wire:model="email"
-            :label="__('Email address')"
+      <form wire:submit.prevent="login">
+        <div class="input-group mb-3">
+          <input
+            wire:model.defer="email"
             type="email"
+            class="form-control"
+            placeholder="Correo electrónico"
             required
-            autofocus
-            autocomplete="email"
-            placeholder="email@example.com"
-        />
-
-        <!-- Password -->
-        <div class="relative">
-            <flux:input
-                wire:model="password"
-                :label="__('Password')"
-                type="password"
-                required
-                autocomplete="current-password"
-                :placeholder="__('Password')"
-                viewable
-            />
-
-            @if (Route::has('password.request'))
-                <flux:link class="absolute end-0 top-0 text-sm" :href="route('password.request')" wire:navigate>
-                    {{ __('Forgot your password?') }}
-                </flux:link>
-            @endif
+            autofocus>
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-envelope"></span>
+            </div>
+          </div>
         </div>
 
-        <!-- Remember Me -->
-        <flux:checkbox wire:model="remember" :label="__('Remember me')" />
-
-        <div class="flex items-center justify-end">
-            <flux:button variant="primary" type="submit" class="w-full">{{ __('Log in') }}</flux:button>
+        <div class="input-group mb-3">
+          <input
+            wire:model.defer="password"
+            type="password"
+            class="form-control"
+            placeholder="Contraseña"
+            required>
+          <div class="input-group-append">
+            <div class="input-group-text">
+              <span class="fas fa-lock"></span>
+            </div>
+          </div>
         </div>
-    </form>
 
-    @if (Route::has('register'))
-        <div class="space-x-1 rtl:space-x-reverse text-center text-sm text-zinc-600 dark:text-zinc-400">
-            {{ __('Don\'t have an account?') }}
-            <flux:link :href="route('register')" wire:navigate>{{ __('Sign up') }}</flux:link>
+        <div class="row">
+          <div class="col-8">
+            <div class="icheck-primary">
+              <input
+                wire:model="remember"
+                type="checkbox"
+                id="remember">
+              <label for="remember">Recordarme</label>
+            </div>
+          </div>
+
+          <div class="col-4">
+            <button type="submit" class="btn btn-primary btn-block">
+              Entrar
+            </button>
+          </div>
         </div>
-    @endif
+      </form>
+
+      <p class="mb-1 mt-3">
+        <a href="{{ route('password.request') }}">Olvidé mi contraseña</a>
+      </p>
+      <p class="mb-0">
+        <a href="{{ route('register') }}" class="text-center">
+          Registrar una nueva cuenta
+        </a>
+      </p>
+    </div>
+  </div>
 </div>

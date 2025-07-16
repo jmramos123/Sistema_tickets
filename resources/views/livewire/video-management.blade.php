@@ -61,16 +61,21 @@
                         @endif
                     </td>
                     <td>
-                        <button wire:click="delete({{ $video->id }})"
-                                onclick="return confirm('¿Eliminar este video?')"
-                                class="btn btn-danger btn-sm">
+                        <button 
+                            wire:click="confirmDelete({{ $video->id }})"
+                            class="btn btn-danger btn-sm">
                             🗑️ Eliminar
                         </button>
-
                         @if(!$video->is_active)
                             <button wire:click="setAsActive({{ $video->id }})"
                                     class="btn btn-outline-success btn-sm ms-1">
                                 📺 Enviar a TV
+                            </button>
+                        @endif
+                        @if($video->is_active)
+                            <button wire:click="removeActive"
+                                    class="btn btn-outline-danger btn-sm ms-1">
+                                ❌ Quitar de TV
                             </button>
                         @endif
                     </td>
@@ -82,9 +87,30 @@
             @endforelse
         </tbody>
     </table>
+    @if ($confirmingVideoDeleteId)
+    <div 
+        class="position-fixed top-0 start-0 w-100 h-100 d-flex align-items-center justify-content-center" 
+        style="background-color: rgba(0,0,0,0.5); z-index: 9999;"
+    >
+        <div class="card p-4 text-center shadow" style="max-width: 400px;">
+            <h5 class="mb-3">¿Eliminar este video?</h5>
+            <div class="d-flex justify-content-center gap-2">
+                <button 
+                    wire:click="delete({{ $confirmingVideoDeleteId }})"
+                    class="btn btn-danger">
+                    Sí
+                </button>
+                <button 
+                    wire:click="cancelDelete"
+                    class="btn btn-secondary">
+                    No
+                </button>
+            </div>
+        </div>
+    </div>
+@endif
+
 </div>
-
-
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('video-upload-form');

@@ -23,9 +23,11 @@
           class="called-card bg-warning text-dark text-center p-5 rounded shadow"
           style="width: 100%; max-width: 90%;"
         >
-          <h1 class="display-1 fw-bold mb-4">#<span x-text="called.numero"></span></h1>
-          <h2 class="fw-semibold">Diríjase a:</h2>
-          <h3 class="fw-bold" x-text="called.escritorio.nombre_escritorio"></h3>
+          <h1 class="mb-4 fw-ultra-bold" style="font-size: 4rem;">
+            <span x-text="`${called.area.codigo_area}-${called.numero.toString().padStart(3, '0')}`"></span>
+          </h1>
+          <h2 class="mb-4 fw-ultra-bold">Diríjase a:</h2>
+          <h3 class="mb-4 fw-ultra-bold" x-text="called.escritorio.nombre_escritorio"></h3>
         </div>
       </template>
       <template x-if="!called">
@@ -35,7 +37,7 @@
 
     {{-- Video --}}
     <div style="flex: 5.8; background: #000; padding: 1rem;">
-      <div style="flex: 1; border-radius: 0.5rem; overflow: hidden;">
+      <div style="height: 100%; border-radius: 0.5rem; overflow: hidden;">
         @if($activeVideo)
           <video autoplay loop muted style="width: 100%; height: 100%; object-fit: cover;">
             <source src="{{ asset('storage/'.$activeVideo->ruta_archivo) }}" type="video/mp4">
@@ -47,12 +49,11 @@
         @endif
       </div>
     </div>
-
   </div>
 
     {{-- BOTTOM SECTION: Tickets List --}}
     <div style="flex: 0.25; background-color: #e9e9e9; padding: 0.75rem 1rem 0.75rem 1rem; display: flex; flex-direction: column; overflow: hidden;">
-    <h5 class="fw-bold mb-1" style="color: #222; margin-bottom: 0;">En espera</h5>
+    <h5 class="fw-bold mb-1" style="color: #222; margin-bottom: 0; font-size: 1.5rem;">En espera</h5>
         <div style="margin-top: -15px; flex: 1; display: flex; flex-direction: row; align-items: center; justify-content: center; gap: 1rem; overflow-x: auto; overflow-y: hidden;">
             <template x-for="ticket in tickets" :key="ticket.id">
             <div 
@@ -73,9 +74,8 @@
             </div>
             
             </template>
-        </div>
-    </div>
-
+      </div>
+  </div>
 </div>
 @push('scripts')
 <script>

@@ -1,16 +1,35 @@
 <div wire:poll.3000ms>
 
     {{-- Sidebar --}}
-    <div class="bg-dark text-white position-fixed top-0 start-0 vh-100 p-3" style="width: 220px; z-index: 1000;">
-        <h5 class="mb-4">Áreas</h5>
-        @foreach($areas as $area)
+    <div class="bg-dark text-white position-fixed top-0 start-0 vh-100 d-flex flex-column p-3" style="width: 220px; z-index: 1000;">
+
+        {{-- Top: Areas --}}
+        <div>
+            <h5 class="mb-4">Áreas</h5>
+            @foreach($areas as $area)
             <button 
                 wire:click="switchArea({{ $area->id }})"
                 class="btn mb-2 text-start w-100 {{ $areaId == $area->id ? 'btn-primary' : 'btn-outline-light' }}">
                 {{ $area->nombre_area }}
             </button>
-        @endforeach
+            @endforeach
+        </div>
+
+        {{-- Bottom: Logout & Change Desk --}}
+        <div class="mt-auto">
+            <a href="{{ route('user.selectDesk') }}" class="btn btn-outline-light w-100 mb-2">
+            Cambiar escritorio
+            </a>
+            <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="btn btn-outline-light w-100">
+                Cerrar sesión
+            </button>
+            </form>
+        </div>
+
     </div>
+
 
     {{-- Main content --}}
     <div class="p-4" style="margin-left: 220px;">

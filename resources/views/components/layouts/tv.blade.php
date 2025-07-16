@@ -33,6 +33,24 @@
         animation: flicker 0.5s ease-in-out 3;
     }
 
+    .called-card h1 {
+        font-size: 5rem;
+    }
+
+    .called-card h2 {
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .called-card h3 {
+        font-size: 3rem;
+        text-align:center;
+    }
+    
+    .fw-ultra-bold {
+        font-weight: 900;
+    }
+
     .ticket-card {
         min-width: 250px;
         height: 120px;

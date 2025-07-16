@@ -5,10 +5,35 @@
         <div class="alert alert-success">{{ session('message') }}</div>
     @endif
 
-    <div class="d-flex justify-content-between mb-3">
-        <input type="text" wire:model="search" class="form-control w-25" placeholder="Buscar...">
-        <button wire:click="openModal" class="btn btn-primary">Crear Usuario</button>
+    <div class="d-flex flex-wrap justify-content-between mb-3 gap-2">
+
+
+        <button wire:click="$refresh" class="btn btn-outline-secondary">Limpiar Filtros</button>
+
+        <!-- Search -->
+        <input type="text" wire:model.debounce.300ms="search" class="form-control w-25" placeholder="Buscar...">
+
+        <!-- Filter by Área -->
+        <select wire:model="filterArea" class="form-select w-25">
+            <option value="">Todas las Áreas</option>
+            @foreach ($areas as $area)
+                <option value="{{ $area->id }}">{{ $area->nombre_area }}</option>
+            @endforeach
+        </select>
+
+        <!-- Filter by Estado -->
+        <select wire:model="filterStatus" class="form-select w-25">
+            <option value="">Todos los Estados</option>
+            <option value="enabled">Habilitado</option>
+            <option value="disabled">Deshabilitado</option>
+        </select>
+
+        <!-- Create User Button -->
+        <button wire:click="openModal" class="btn btn-primary">
+            Crear Usuario
+        </button>
     </div>
+
 
     <table class="table table-bordered">
         <thead>
