@@ -13,6 +13,10 @@ use Carbon\Carbon;
 
 class TicketQueue extends Component
 {
+    public $verAtendidos = false;
+    public $ticketsAtendidos = [];
+    public $normalesLeft = 0;
+    public $adultosLeft = 0;
     public $escritorioId;
     public $areaId;
     public $areas;
@@ -45,23 +49,57 @@ class TicketQueue extends Component
             return redirect()->route('user.desks');
         }
 
-        $this->areas = Area::orderBy('nombre_area')->get();
+        $this->deleteOldTickets();
+        $this->areas = Area::where('id', '!=', 1) // or ->where('id', '!=', 1)
+            ->orderBy('nombre_area')
+            ->get();
+        $this->loadTickets();
+    }
+
+    protected function deleteOldTickets()
+    {
+        Ticket::whereDate('created_at', '<', now()->toDateString())->delete();
+    }
+
+    public function toggleAtendidos()
+    {
+        $this->verAtendidos = !$this->verAtendidos;
         $this->loadTickets();
     }
 
     public function loadTickets()
     {
+        if ($this->verAtendidos) {
+            $this->ticketsAtendidos = Ticket::where('estado', 'atendido')
+                ->orderBy('created_at', 'desc')
+                ->take(50)
+                ->get();
+            return;
+        }
+
         $this->ticketsNormales = Ticket::where('area_id', $this->areaId)
             ->where('es_adulto_mayor', false)
+            ->whereIn('estado', ['pendiente', 'llamado'])  // include both statuses
             ->orderBy('numero')
-            ->take(10)
+            ->take(5)
             ->get();
 
         $this->ticketsAdultoMayor = Ticket::where('area_id', $this->areaId)
             ->where('es_adulto_mayor', true)
+            ->whereIn('estado', ['pendiente', 'llamado'])  // include both statuses
             ->orderBy('numero')
-            ->take(10)
+            ->take(5)
             ->get();
+
+        $this->normalesLeft = Ticket::where('area_id', $this->areaId)
+            ->where('es_adulto_mayor', false)
+            ->where('estado', 'pendiente')
+            ->count() - $this->ticketsNormales->count();
+
+        $this->adultosLeft = Ticket::where('area_id', $this->areaId)
+            ->where('es_adulto_mayor', true)
+            ->where('estado', 'pendiente')
+            ->count() - $this->ticketsAdultoMayor->count();
     }
 
     public function switchArea($newAreaId)
@@ -72,34 +110,37 @@ class TicketQueue extends Component
 
     public function llamar($ticketId)
     {
-        logger("LLAMAR fired for ticket ID: {$ticketId}");
-
         $ticket = Ticket::findOrFail($ticketId);
         $now = now();
 
+        // Record the call (incrementing attempts, etc.)
         $llamada = Llamada::firstOrNew(['ticket_id' => $ticket->id]);
-
         if (!$llamada->exists) {
-            $llamada->escritorio_id    = $this->escritorioId;
-            $llamada->usuario_id       = Auth::id();
-            $llamada->es_adulto_mayor  = $ticket->es_adulto_mayor;
-            $llamada->llamado_en       = $ticket->created_at; // Or $now if you prefer
-            $llamada->intentos         = 1;
+            $llamada->escritorio_id   = $this->escritorioId;
+            $llamada->usuario_id      = Auth::id();
+            $llamada->es_adulto_mayor = $ticket->es_adulto_mayor;
+            $llamada->llamado_en      = $ticket->created_at;
+            $llamada->intentos        = 1;
         } else {
             $llamada->intentos++;
-            if (!$llamada->usuario_id) {
-                $llamada->usuario_id = Auth::id();
-            }
+            $llamada->usuario_id = $llamada->usuario_id ?? Auth::id();
+            // If you want to treat this recall as a fresh call time:
+            $llamada->llamado_en = $now;
         }
-
         $llamada->save();
 
-        $ticket->estado = 'llamado';
-        $ticket->save();
+        // **Only change estado if it was still pendiente**
+        if ($ticket->estado === 'pendiente') {
+            $ticket->estado = 'llamado';
+            // Optionally reset created_at so it flows through your queue logic
+            // $ticket->created_at = $now;
+            $ticket->save();
+        }
 
-        logger("DISPATCHING TicketCalled broadcast for ticket ID: {$ticketId}");
-        event(new TicketCalled($ticketId));
+        // Broadcast the call in all cases
+        event(new TicketCalled($ticket->id));
 
+        // Reload lists
         $this->loadTickets();
     }
 
@@ -116,7 +157,9 @@ class TicketQueue extends Component
             $llamada->save();
         }
 
-        $ticket->delete();
+        $ticket->estado = 'atendido';
+        $ticket->save();
+
         $this->loadTickets();
     }
 

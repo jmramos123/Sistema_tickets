@@ -37,7 +37,7 @@
     </div>
 
     {{-- Auto refresh --}}
-    <div wire:poll.visible.100ms="$refresh"></div>
+    <div wire:poll.visible.1000ms="$refresh"></div>
 
     {{-- Summary cards --}}
     <div class="row g-3 mb-4">
@@ -63,8 +63,19 @@
 
     {{-- Hidden data for JS --}}
     <div id="chart-data" class="d-none">
-        <span id="chart-labels">@json($chartLabels)</span>
-        <span id="chart-counts">@json($chartCounts)</span>
+    {{-- Line chart data --}}
+    <span id="chart-labels">@json($chartLabels)</span>
+    <span id="chart-counts">@json($chartCounts)</span>
+
+    {{-- Bar chart data --}}
+    <span id="desk-labels">@json(array_keys($topDesks))</span>
+    <span id="desk-counts">@json(array_values($topDesks))</span>
+
+    <span id="employee-labels">@json(array_keys($topEmployees))</span>
+    <span id="employee-counts">@json(array_values($topEmployees))</span>
+
+    <span id="area-labels">@json(array_keys($topAreas))</span>
+    <span id="area-counts">@json(array_values($topAreas))</span>
     </div>
 
     {{-- Chart --}}
@@ -73,108 +84,111 @@
     </div>
 
     {{-- Top lists --}}
-    <div class="row mt-5 g-4">
-        <div class="col-md-4">
-            <h5 class="fw-bold mb-3 text-primary">Top Escritorios</h5>
-            <ul class="list-group">
-                @forelse($topDesks as $deskName => $count)
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ $deskName }}
-                        <span class="badge bg-primary rounded-pill">{{ $count }}</span>
-                    </li>
-                @empty
-                    <li class="list-group-item text-muted fst-italic">Sin datos para este rango.</li>
-                @endforelse
-            </ul>
-        </div>
-
-        <div class="col-md-4">
-            <h5 class="fw-bold mb-3 text-success">Top Empleados</h5>
-            <ul class="list-group">
-                @forelse($topEmployees as $employeeName => $count)
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ $employeeName }}
-                        <span class="badge bg-success rounded-pill">{{ $count }}</span>
-                    </li>
-                @empty
-                    <li class="list-group-item text-muted fst-italic">Sin datos para este rango.</li>
-                @endforelse
-            </ul>
-        </div>
-
-        <div class="col-md-4">
-            <h5 class="fw-bold mb-3 text-warning">Top Áreas</h5>
-            <ul class="list-group">
-                @forelse($topAreas as $areaName => $count)
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        {{ $areaName }}
-                        <span class="badge bg-warning rounded-pill">{{ $count }}</span>
-                    </li>
-                @empty
-                    <li class="list-group-item text-muted fst-italic">Sin datos para este rango.</li>
-                @endforelse
-            </ul>
+    {{-- Below the main line chart --}}
+    <div class="row mt-4">
+    <div class="col-md-4">
+        <h6 class="text-primary">Top Escritorios</h6>
+        <div wire:ignore>
+        <canvas id="desksBarChart" style="width:100%; height:200px;"></canvas>
         </div>
     </div>
+    <div class="col-md-4">
+        <h6 class="text-success">Top Empleados</h6>
+        <div wire:ignore>
+        <canvas id="employeesBarChart" style="width:100%; height:200px;"></canvas>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <h6 class="text-warning">Top Áreas</h6>
+        <div wire:ignore>
+        <canvas id="areasBarChart" style="width:100%; height:200px;"></canvas>
+        </div>
+    </div>
+    </div>
+
 </div>
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-let chart;
+let chart, desksChart, employeesChart, areasChart;
 
-// Always attach the listener globally
+// Re-render all charts when filters update
 document.addEventListener('updatedFilters', () => {
     console.log('📡 Livewire "updatedFilters" event received');
-    // Wait a tick to let Livewire update the DOM
-    requestAnimationFrame(() => {
-        renderChart();
-    });
+    requestAnimationFrame(renderAllCharts);
 });
 
-function getChartData() {
+// Utility to parse hidden JSON spans
+function getChartData(idLabels, idCounts) {
     try {
-        const labels = JSON.parse(document.getElementById('chart-labels')?.textContent || '[]');
-        const counts = JSON.parse(document.getElementById('chart-counts')?.textContent || '[]');
+        const labels = JSON.parse(document.getElementById(idLabels)?.textContent || '[]');
+        const counts = JSON.parse(document.getElementById(idCounts)?.textContent || '[]');
         return { labels, counts };
     } catch (e) {
-        console.warn('❌ Could not parse chart data', e);
+        console.warn(`❌ Could not parse data for ${idLabels}/${idCounts}`, e);
         return { labels: [], counts: [] };
     }
 }
 
-function renderChart() {
-    const { labels, counts } = getChartData();
+// Line chart
+function renderLineChart() {
+    const { labels, counts } = getChartData('chart-labels', 'chart-counts');
     const ctx = document.getElementById('ticketsChart')?.getContext('2d');
     if (!ctx) return;
-
     if (chart) chart.destroy();
-
     chart = new Chart(ctx, {
         type: 'line',
-        data: {
-            labels,
-            datasets: [{
-                label: 'Tickets emitidos',
-                data: counts,
-                tension: 0.2,
-                fill: true,
-                borderColor: '#007bff',
-                backgroundColor: 'rgba(0,123,255,0.1)',
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: { title: { display: true, text: 'Fecha' } },
-                y: { beginAtZero: true, title: { display: true, text: 'Cantidad' } }
-            }
-        }
+        data: { labels, datasets: [{ label: 'Tickets emitidos', data: counts, tension: 0.2, fill: true }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
     });
-
-    console.log('✅ Chart rendered:', labels, counts);
 }
-// Initial chart render
-document.addEventListener('DOMContentLoaded', renderChart);
+
+// Bar charts
+function renderDesksBarChart() {
+    const { labels, counts } = getChartData('desk-labels', 'desk-counts');
+    const ctx = document.getElementById('desksBarChart')?.getContext('2d');
+    if (!ctx) return;
+    if (desksChart) desksChart.destroy();
+    desksChart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels, datasets: [{ label: 'Llamadas por escritorio', data: counts, barThickness: 30 }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+    });
+}
+
+function renderEmployeesBarChart() {
+    const { labels, counts } = getChartData('employee-labels', 'employee-counts');
+    const ctx = document.getElementById('employeesBarChart')?.getContext('2d');
+    if (!ctx) return;
+    if (employeesChart) employeesChart.destroy();
+    employeesChart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels, datasets: [{ label: 'Llamadas por empleado', data: counts, barThickness: 30 }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+    });
+}
+
+function renderAreasBarChart() {
+    const { labels, counts } = getChartData('area-labels', 'area-counts');
+    const ctx = document.getElementById('areasBarChart')?.getContext('2d');
+    if (!ctx) return;
+    if (areasChart) areasChart.destroy();
+    areasChart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels, datasets: [{ label: 'Llamadas por área', data: counts, barThickness: 30 }] },
+        options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true } } }
+    });
+}
+
+// Render all charts
+function renderAllCharts() {
+    renderLineChart();
+    renderDesksBarChart();
+    renderEmployeesBarChart();
+    renderAreasBarChart();
+}
+
+// Initial render on load
+document.addEventListener('DOMContentLoaded', renderAllCharts);
 </script>
 @endpush

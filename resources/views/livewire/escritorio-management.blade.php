@@ -22,7 +22,7 @@
             @foreach ($escritorios as $escritorio)
                 <tr>
                     <td>{{ $escritorio->nombre_escritorio }}</td>
-                    <td>{{ $escritorio->area->nombre_area }}</td>
+                    <td>{{ $escritorio->area->nombre_area ?? '—' }}</td>
                     <td>
                         <button wire:click="edit({{ $escritorio->id }})" class="btn btn-sm btn-primary">Editar</button>
                         <button wire:click="delete({{ $escritorio->id }})" class="btn btn-sm btn-danger"

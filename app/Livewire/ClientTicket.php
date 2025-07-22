@@ -61,7 +61,7 @@ class ClientTicket extends Component
 
     public function resetToMenu()
     {
-        $this->resetPage();     // reset pagination back to page 1
+        $this->resetPage();     // resetea la paginacion a la pigina 1
         $this->step          = 'selectArea';
         $this->selectedArea  = null;
         $this->isAdultoMayor = false;
@@ -71,8 +71,9 @@ class ClientTicket extends Component
     public function render()
     {
         return view('livewire.client-ticket', [
-            'areas' => Area::orderBy('codigo_area')
-                           ->paginate($this->perPage),
+            'areas' => Area::where('id', '!=', 1)
+                        ->orderBy('codigo_area')
+                        ->paginate($this->perPage),
         ])->layout('components.layouts.client');
     }
 }

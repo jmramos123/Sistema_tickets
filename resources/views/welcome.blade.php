@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <title>Página de Bienvenida</title>
-    <link rel="stylesheet" href="{{ asset('css/app.css') }}">
     <style>
         body {
             background: #f8fafc;

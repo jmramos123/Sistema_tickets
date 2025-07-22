@@ -53,7 +53,7 @@
                     <td>{{ $usuario->persona->nombre }} {{ $usuario->persona->apellido }}</td>
                     <td>{{ $usuario->persona->email }}</td>
                     <td>{{ $usuario->username }}</td>
-                    <td>{{ $usuario->area->nombre_area }}</td>
+                    <td>{{ $usuario->area->nombre_area ?? '—' }}</td>
                     <td>{{ $usuario->roles->pluck('name')->join(', ') }}</td>
                     <td>
                         <span class="badge bg-{{ $usuario->status === 'enabled' ? 'success' : 'secondary' }}">

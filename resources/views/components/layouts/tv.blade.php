@@ -12,14 +12,14 @@
     ])
     @livewireStyles
     <style>
-    @keyframes flicker {
-        0%, 100% { opacity: 1; }
-        50%      { opacity: 0.4; }
+    :root {
+        --called-bg: #fff;
+        --called-color: #111;
     }
 
     .called-card {
-        background-color: #fff;
-        color: #111;
+        background-color: var(--called-bg);
+        color: var(--called-color);
         border-radius: 1rem;
         padding: 2rem;
         box-shadow: 0 0 30px rgba(255, 255, 255, 0.2);
@@ -27,10 +27,26 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        transition: background-color 0.3s ease;
+    }
+
+    @keyframes green-flicker-sequence {
+        0%, 100% {
+            background-color: #fff;
+            color: #111;
+        }
+        25%, 75% {
+            background-color: #28ff28;
+            color: #000;
+        }
+        50% {
+            background-color: #fff;
+            color: #111;
+        }
     }
 
     .called-card.flicker {
-        animation: flicker 0.5s ease-in-out 3;
+        animation: green-flicker-sequence 1.5s ease-in-out;
     }
 
     .called-card h1 {

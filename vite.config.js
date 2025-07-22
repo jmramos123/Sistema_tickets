@@ -14,6 +14,7 @@ export default defineConfig({
     strictPort: true,         // fail if 5173 is in use
     hmr: {
       host: '192.168.3.11',   // your dev machine’s LAN IP
+      //host: '192.168.26.3',   // your dev machine’s LAN IP
       protocol: 'ws',         // or 'wss' if you’ve got TLS
       port: 5173,
     },

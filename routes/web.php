@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
-
+use Livewire\Livewire;
 use App\Livewire\UserManagement;
 use App\Livewire\AreaManagement;
 use App\Livewire\EscritorioManagement;
@@ -33,11 +33,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/escritorios', EscritorioManagement::class)->name('admin.escritorios');
     Route::get('/areas', AreaManagement::class)->name('areas.index');
     Route::get('/users', UserManagement::class)->name('admin.users');
-});
-
-// Tickets management accessible by admin or empleado
-Route::middleware(['auth', 'role:admin|empleado'])->group(function () {
-    Route::get('/admin/tickets', TicketManagement::class)->name('tickets.index');
+    Route::get('/tickets', TicketManagement::class)->name('tickets.index');
 });
 
 // Authenticated user routes (non-admin)

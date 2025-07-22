@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('escritorios', function (Blueprint $table) {
             $table->id();
             $table->string('nombre_escritorio');
-            $table->foreignId('area_id')->constrained('areas')->onDelete('cascade');
+            $table->foreignId('area_id')->nullable()->constrained('areas')->nullOnDelete();
             $table->timestamps();
         });
     }
