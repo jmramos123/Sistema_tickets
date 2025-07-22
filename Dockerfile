@@ -19,8 +19,11 @@ COPY . .
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader
 
-# Set permissions
+# Set proper permissions
 RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache
 
-# Set the startup command
+# Expose the port Laravel will serve on
+EXPOSE 10000
+
+# Start Laravel's built-in server
 CMD php artisan serve --host=0.0.0.0 --port=10000
