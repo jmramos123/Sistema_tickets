@@ -8,12 +8,14 @@ use Illuminate\Validation\Rule;
 
 class AreaManagement extends Component
 {
+    public $search = '';
+
     public $areas, $selectedArea = null;
     public $codigo_area, $nombre_area, $descripcion;
     public $isEditMode = false;
 
     protected $rules = [
-        'codigo_area' => 'required|string|unique:areas,codigo_area',
+        'codigo_area' => 'nullable|exists:codigo_area',
         'nombre_area' => 'required|string|min:3',
         'descripcion' => 'nullable|string',
     ];
@@ -25,7 +27,13 @@ class AreaManagement extends Component
 
     public function loadAreas()
     {
-        $this->areas = Area::all();
+        $this->areas = Area::query()
+            ->when($this->search, function ($query) {
+                $query->where('codigo_area', 'like', '%' . $this->search . '%')
+                    ->orWhere('nombre_area', 'like', '%' . $this->search . '%')
+                    ->orWhere('descripcion', 'like', '%' . $this->search . '%');
+            })
+            ->get();
     }
 
     public function resetInput()
@@ -40,6 +48,11 @@ class AreaManagement extends Component
         $this->nombre_area = $area->nombre_area;
         $this->descripcion = $area->descripcion;
         $this->isEditMode = true;
+    }
+
+    public function applySearch()
+    {
+        $this->loadAreas(); // reload with the current $search value
     }
 
     public function save()
@@ -60,7 +73,7 @@ class AreaManagement extends Component
         if ($this->isEditMode) {
             $area = $this->selectedArea;
             $area->update([
-                'codigo_area' => $this->codigo_area,
+                'codigo_area' => $this->codigo_area ?: null, 
                 'nombre_area' => $this->nombre_area,
                 'descripcion' => $this->descripcion,
             ]);
@@ -68,7 +81,7 @@ class AreaManagement extends Component
             session()->flash('message', 'Área actualizada correctamente.');
         } else {
             Area::create([
-                'codigo_area' => $this->codigo_area,
+                'codigo_area' => $this->codigo_area ?: null,
                 'nombre_area' => $this->nombre_area,
                 'descripcion' => $this->descripcion,
             ]);

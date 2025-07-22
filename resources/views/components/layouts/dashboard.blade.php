@@ -3,50 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}"> <!-- Add this line -->
     <title>{{ $title ?? 'Panel de Administración' }}</title>
+    
 
     {{-- Bootstrap --}}
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 
     {{-- Custom Styles --}}
     <style>
-        html, body {
-            height: 100%;
-            margin: 0;
-        }
-
         body {
             display: flex;
             min-height: 100vh;
-            flex-direction: row;
-            overflow: hidden;
         }
-
         .sidebar {
             width: 220px;
             background-color: #343a40;
             flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
         }
-
         .sidebar .nav-link {
             color: #ddd;
         }
-
-        .sidebar .nav-link.active,
-        .sidebar .nav-link:hover {
+        .sidebar .nav-link.active, .sidebar .nav-link:hover {
             background-color: #495057;
             color: #fff;
         }
-
         .content {
             flex-grow: 1;
             padding: 1.5rem;
             background-color: #f8f9fa;
-            overflow-y: auto;
         }
     </style>
 
@@ -123,15 +108,17 @@
         document.addEventListener('livewire:init', () => {
             Livewire.hook('upload.start', (file) => {
                 if (!file) return;
-
+            
+            // Ensure file has name property
                 if (!file.name && file.file) {
                     file.name = file.file.name;
                 }
-
+            
+            // Fallback name generation
                 if (!file.name) {
                     file.name = 'video_' + Date.now() + '.mp4';
                 }
-            });
+        });
         });
     </script>
     @livewireScripts

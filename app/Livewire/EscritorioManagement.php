@@ -17,7 +17,7 @@ class EscritorioManagement extends Component
 
     protected $rules = [
         'nombre' => 'required|string|min:3',
-        'area_id' => 'required|exists:areas,id',
+        'area_id' => 'nullable|exists:areas,id',
     ];
 
     public function mount()
@@ -54,13 +54,13 @@ class EscritorioManagement extends Component
             $escritorio = Escritorio::findOrFail($this->escritorio_id);
             $escritorio->update([
                 'nombre_escritorio' => $this->nombre,
-                'area_id' => $this->area_id,
+                'area_id' => $this->area_id ?: null,
             ]);
             session()->flash('message', 'Escritorio actualizado correctamente.');
         } else {
             Escritorio::create([
                 'nombre_escritorio' => $this->nombre,
-                'area_id' => $this->area_id,
+                'area_id' => $this->area_id ?: null,
             ]);
             session()->flash('message', 'Escritorio creado correctamente.');
         }

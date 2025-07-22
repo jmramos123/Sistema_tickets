@@ -17,6 +17,9 @@ class UserManagement extends Component
 {
     use WithPagination;
 
+    public $filterArea = '';
+    public $filterStatus = '';
+
     public $search = '';
     public $modalOpen = false;
     public $isEditMode = false;
@@ -54,15 +57,45 @@ class UserManagement extends Component
 
     public function render()
     {
+        $query = Usuario::with('persona', 'area', 'roles')
+            ->when($this->search, function ($q) {
+                $q->whereHas('persona', function ($subQuery) {
+                    $subQuery->where('nombre', 'like', "%{$this->search}%")
+                        ->orWhere('apellido', 'like', "%{$this->search}%")
+                        ->orWhere('email', 'like', "%{$this->search}%");
+                });
+            })
+            ->when($this->filterArea, function ($q) {
+                $q->where('area_id', $this->filterArea);
+            })
+            ->when($this->filterStatus, function ($q) {
+                $q->where('status', $this->filterStatus);
+            });
+
+
+        if ($this->filterArea) {
+            $query->where('area_id', $this->filterArea);
+        }
+
+        if ($this->filterStatus) {
+            $query->where('status', $this->filterStatus);
+        }
+
         return view('livewire.user-management', [
-            'usuarios' => Usuario::with('persona', 'area', 'roles')
-                ->whereHas('persona', fn($q) => $q->where('nombre', 'like', "%{$this->search}%")
-                ->orWhere('apellido', 'like', "%{$this->search}%")
-                ->orWhere('email', 'like', "%{$this->search}%"))
-                ->paginate(5),
+            'usuarios' => $query->paginate(5),
             'areas' => Area::all(),
-            'roles' => Role::pluck('name')
+            'roles' => Role::pluck('name'),
         ]);
+    }
+    
+    public function updatedFilterArea()
+    {
+        $this->resetPage();
+    }
+
+    public function updatedFilterStatus()
+    {
+        $this->resetPage();
     }
 
     public function openModal()
