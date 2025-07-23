@@ -71,6 +71,10 @@ services:
       - key: REVERB_SCHEME
         value: http
 
+      # Disable signal handling (fixes SIGINT error)
+      - key: REVERB_DISABLE_SIGNALS
+        value: true
+
       # Database
       - key: DB_CONNECTION
         value: pgsql
