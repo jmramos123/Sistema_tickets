@@ -21,7 +21,9 @@ WORKDIR /var/www
 COPY . .
 
 # Install PHP dependencies
-RUN composer install --no-dev --optimize-autoloader
+RUN composer install --no-dev --optimize-autoloader && \
+    php artisan config:clear && \
+    php artisan cache:clear
 
 # Build frontend assets
 RUN npm install && npm run build
