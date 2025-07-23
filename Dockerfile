@@ -22,11 +22,16 @@ ENV REVERB_HOST=127.0.0.1
 ENV REVERB_PORT=6001
 ENV REVERB_SCHEME=http
 
+# Prevent Laravel from hitting missing SQLite files during build
+ENV CACHE_STORE=array
+ENV SESSION_DRIVER=array
+
 # Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader && \
     php artisan config:clear && \
     php artisan cache:clear
 
+# Build frontend assets
 RUN npm install && npm run build
 
 # Set permissions
@@ -41,4 +46,5 @@ COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 # Expose HTTP port
 EXPOSE 80
 
+# Run Supervisor to launch PHP-FPM, NGINX, and Reverb together
 CMD ["/usr/bin/supervisord"]
