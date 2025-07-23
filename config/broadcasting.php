@@ -46,7 +46,16 @@ return [
             ],
         ],
 
-        'pusher' => [], // completely empty it
+        'pusher' => env('BROADCAST_CONNECTION') === 'pusher' ? [
+            'driver' => 'pusher',
+            'key' => env('PUSHER_APP_KEY', 'dummy'),
+            'secret' => env('PUSHER_APP_SECRET', 'dummy'),
+            'app_id' => env('PUSHER_APP_ID', 'dummy'),
+            'options' => [
+                'cluster' => env('PUSHER_APP_CLUSTER', 'mt1'),
+                'useTLS' => true,
+            ],
+        ] : [],
 
         'ably' => [
             'driver' => 'ably',
