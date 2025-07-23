@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: laravel-app
+    env: docker
+    plan: free
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_DEBUG
+        value: false
+      - key: BROADCAST_CONNECTION
+        value: reverb
+      - key: VITE_PUSHER_APP_KEY
+        value: local
+      - key: VITE_PUSHER_APP_CLUSTER
+        value: mt1
+      - key: VITE_PUSHER_HOST
+        value: reverb.yourdomain.com
+      - key: VITE_PUSHER_PORT
+        value: 443
+      - key: VITE_PUSHER_SCHEME
+        value: https
+      # Add DB, REDIS, etc. here too
+    dockerfilePath: ./Dockerfile
+
+  - type: worker
+    name: reverb-server
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    startCommand: php artisan reverb:start
+    envVars:
+      - key: BROADCAST_CONNECTION
+        value: reverb
+      - key: REVERB_HOST
+        value: 0.0.0.0
+      - key: REVERB_PORT
+        value: 6001
+      - key: REVERB_SCHEME
+        value: http
+      # Add other necessary vars like APP_KEY, DB, REDIS, etc.
