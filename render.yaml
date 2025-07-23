@@ -14,35 +14,22 @@ services:
       - key: BROADCAST_CONNECTION
         value: reverb
 
-      # Vite + Echo config
-      - key: VITE_PUSHER_APP_KEY
-        value: local
-      - key: VITE_PUSHER_APP_CLUSTER
-        value: mt1
-      - key: VITE_PUSHER_HOST
-        value: reverb.yourdomain.com
-      - key: VITE_PUSHER_PORT
-        value: 443
-      - key: VITE_PUSHER_SCHEME
-        value: https
-
-      # Dummy Pusher values (required to prevent Laravel from crashing)
-      - key: PUSHER_APP_ID
-        value: dummy
-      - key: PUSHER_APP_KEY
-        value: dummy
-      - key: PUSHER_APP_SECRET
-        value: dummy
-      - key: PUSHER_APP_CLUSTER
-        value: mt1
-      - key: PUSHER_HOST
+      - key: REVERB_HOST
         value: 127.0.0.1
-      - key: PUSHER_PORT
+      - key: REVERB_PORT
         value: 6001
-      - key: PUSHER_SCHEME
+      - key: REVERB_SCHEME
         value: http
+      - key: REVERB_PATH
+        value: /reverb
 
-      # Database connection (from your Render Postgres instance)
+      - key: REVERB_APP_ID
+        value: local
+      - key: REVERB_APP_KEY
+        value: local
+      - key: REVERB_APP_SECRET
+        value: local
+
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
@@ -70,7 +57,13 @@ services:
       - key: BROADCAST_CONNECTION
         value: reverb
 
-      # Reverb server config
+      # Reverb server identity
+      - key: REVERB_APP_ID
+        value: local
+      - key: REVERB_APP_KEY
+        value: local
+      - key: REVERB_APP_SECRET
+        value: local
       - key: REVERB_HOST
         value: 0.0.0.0
       - key: REVERB_PORT
@@ -78,23 +71,49 @@ services:
       - key: REVERB_SCHEME
         value: http
 
-      # Dummy Pusher values
-      - key: PUSHER_APP_ID
-        value: dummy
-      - key: PUSHER_APP_KEY
-        value: dummy
-      - key: PUSHER_APP_SECRET
-        value: dummy
-      - key: PUSHER_APP_CLUSTER
-        value: mt1
-      - key: PUSHER_HOST
-        value: 127.0.0.1
-      - key: PUSHER_PORT
+      # Database
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        value: dpg-d20g9l3uibrs7386gkd0-a
+      - key: DB_PORT
+        value: 5432
+      - key: DB_DATABASE
+        value: tickets_db_7s1d
+      - key: DB_USERNAME
+        value: tickets_db_7s1d_user
+      - key: DB_PASSWORD
+        value: DL0DJrogkILluKqZXmW9D8z95wlt1rL4
+
+  - type: worker
+    name: queue-worker
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    startCommand: php artisan queue:work --sleep=3 --tries=3
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        generateValue: true
+      - key: BROADCAST_CONNECTION
+        value: reverb
+
+      # Reverb credentials for any broadcasts done in jobs
+      - key: REVERB_APP_ID
+        value: local
+      - key: REVERB_APP_KEY
+        value: local
+      - key: REVERB_APP_SECRET
+        value: local
+      - key: REVERB_HOST
+        value: reverb-server
+      - key: REVERB_PORT
         value: 6001
-      - key: PUSHER_SCHEME
+      - key: REVERB_SCHEME
         value: http
 
-      # Database connection (same as web)
+      # Database
       - key: DB_CONNECTION
         value: pgsql
       - key: DB_HOST
