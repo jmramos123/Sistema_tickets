@@ -46,19 +46,7 @@ return [
             ],
         ],
 
-        'pusher' => [
-            'driver' => 'pusher',
-            'key' => env('PUSHER_APP_KEY', 'dummy'),
-            'secret' => env('PUSHER_APP_SECRET', 'dummy'),
-            'app_id' => env('PUSHER_APP_ID', 'dummy'),
-            'options' => [
-                'cluster' => env('PUSHER_APP_CLUSTER', 'mt1'),
-                'useTLS' => true,
-                'host' => env('PUSHER_HOST', 'localhost'),
-                'port' => env('PUSHER_PORT', 6001),
-                'scheme' => env('PUSHER_SCHEME', 'https'),
-            ],
-        ],
+        'pusher' => [], // completely empty it
 
         'ably' => [
             'driver' => 'ably',
