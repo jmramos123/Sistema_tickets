@@ -3,6 +3,7 @@ services:
     name: laravel-app
     env: docker
     plan: free
+    dockerfilePath: ./Dockerfile
     envVars:
       - key: APP_ENV
         value: production
@@ -12,6 +13,8 @@ services:
         value: false
       - key: BROADCAST_CONNECTION
         value: reverb
+
+      # Vite + Echo config
       - key: VITE_PUSHER_APP_KEY
         value: local
       - key: VITE_PUSHER_APP_CLUSTER
@@ -22,8 +25,36 @@ services:
         value: 443
       - key: VITE_PUSHER_SCHEME
         value: https
-      # Add DB, REDIS, etc. here too
-    dockerfilePath: ./Dockerfile
+
+      # Dummy Pusher values (required to prevent Laravel from crashing)
+      - key: PUSHER_APP_ID
+        value: dummy
+      - key: PUSHER_APP_KEY
+        value: dummy
+      - key: PUSHER_APP_SECRET
+        value: dummy
+      - key: PUSHER_APP_CLUSTER
+        value: mt1
+      - key: PUSHER_HOST
+        value: 127.0.0.1
+      - key: PUSHER_PORT
+        value: 6001
+      - key: PUSHER_SCHEME
+        value: http
+
+      # Database connection (from your Render Postgres instance)
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        value: dpg-d20g9l3uibrs7386gkd0-a
+      - key: DB_PORT
+        value: 5432
+      - key: DB_DATABASE
+        value: tickets_db_7s1d
+      - key: DB_USERNAME
+        value: tickets_db_7s1d_user
+      - key: DB_PASSWORD
+        value: DL0DJrogkILluKqZXmW9D8z95wlt1rL4
 
   - type: worker
     name: reverb-server
@@ -32,12 +63,47 @@ services:
     dockerfilePath: ./Dockerfile
     startCommand: php artisan reverb:start
     envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        generateValue: true
       - key: BROADCAST_CONNECTION
         value: reverb
+
+      # Reverb server config
       - key: REVERB_HOST
         value: 0.0.0.0
       - key: REVERB_PORT
         value: 6001
       - key: REVERB_SCHEME
         value: http
-      # Add other necessary vars like APP_KEY, DB, REDIS, etc.
+
+      # Dummy Pusher values
+      - key: PUSHER_APP_ID
+        value: dummy
+      - key: PUSHER_APP_KEY
+        value: dummy
+      - key: PUSHER_APP_SECRET
+        value: dummy
+      - key: PUSHER_APP_CLUSTER
+        value: mt1
+      - key: PUSHER_HOST
+        value: 127.0.0.1
+      - key: PUSHER_PORT
+        value: 6001
+      - key: PUSHER_SCHEME
+        value: http
+
+      # Database connection (same as web)
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        value: dpg-d20g9l3uibrs7386gkd0-a
+      - key: DB_PORT
+        value: 5432
+      - key: DB_DATABASE
+        value: tickets_db_7s1d
+      - key: DB_USERNAME
+        value: tickets_db_7s1d_user
+      - key: DB_PASSWORD
+        value: DL0DJrogkILluKqZXmW9D8z95wlt1rL4
