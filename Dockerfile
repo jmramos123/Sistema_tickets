@@ -14,6 +14,15 @@ WORKDIR /var/www
 
 COPY . .
 
+# Add dummy envs to avoid null error in artisan
+ENV REVERB_APP_KEY=local
+ENV REVERB_APP_SECRET=local
+ENV REVERB_APP_ID=local
+ENV REVERB_HOST=127.0.0.1
+ENV REVERB_PORT=6001
+ENV REVERB_SCHEME=http
+
+# Install PHP dependencies
 RUN composer install --no-dev --optimize-autoloader && \
     php artisan config:clear && \
     php artisan cache:clear
