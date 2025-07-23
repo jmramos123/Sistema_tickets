@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .listen('.NewVideoUploaded', (payload) => {
                 //console.log('NewVideoUploaded → reload TV', payload);
-                window.location.relo  ad();
+                window.location.reload();
             })
             .listen('.VideoDeleted', () => {
                 //console.log('VideoDeleted → reload TV');
