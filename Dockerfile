@@ -6,7 +6,6 @@ RUN apt-get update && apt-get install -y \
     libpq-dev libsqlite3-dev nodejs npm nginx supervisor \
  && docker-php-ext-install pdo pdo_pgsql pgsql zip pcntl
 
-
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
@@ -43,8 +42,12 @@ COPY nginx.conf /etc/nginx/nginx.conf
 # Copy Supervisor config
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+# Copy entrypoint script and make executable
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
 # Expose HTTP port
 EXPOSE 80
 
-# Run Supervisor to launch PHP-FPM, NGINX, and Reverb together
-CMD ["/usr/bin/supervisord"]
+# Use entrypoint to run migrations before starting services
+ENTRYPOINT ["docker-entrypoint.sh"]
