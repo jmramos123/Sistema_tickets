@@ -13,6 +13,9 @@ WORKDIR /var/www
 
 COPY . .
 
+# Remove the local .env so Laravel picks up only the Render‐provided environment variables
+RUN rm -f /var/www/.env
+
 # Add dummy envs to avoid null error in artisan
 ENV REVERB_APP_KEY=local
 ENV REVERB_APP_SECRET=local
