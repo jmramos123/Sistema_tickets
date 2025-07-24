@@ -1,0 +1,13 @@
+--- src/Servers/Reverb/Console/Commands/StartServer.php.original	2025-06-16 09:48:47.000000000 -0400
++++ src/Servers/Reverb/Console/Commands/StartServer.php	2025-07-23 21:07:31.191848000 -0400
+@@ -2,6 +2,10 @@
+ 
+ namespace Laravel\Reverb\Servers\Reverb\Console\Commands;
+ 
++use const SIGINT;
++use const SIGTERM;
++use const SIGTSTP;
++
+ use Illuminate\Console\Command;
+ use Illuminate\Support\Facades\Cache;
+ use Laravel\Reverb\Application;
