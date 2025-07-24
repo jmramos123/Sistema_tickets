@@ -2,23 +2,48 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Seeder;
-use App\Models\Usuario;
+use Illuminate\Support\Facades\DB;
 use App\Models\Persona;
-use Spatie\Permission\Models\Role;
+use App\Models\Usuario;
 use Illuminate\Support\Facades\Hash;
 
 class UsersSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        DB::table('usuarios')->truncate();
-        DB::table('personas')->truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        $driver = DB::getDriverName();
 
-        // Crear persona asociada
+        switch ($driver) {
+            case 'mysql':
+                // Temporarily disable FKs for MySQL
+                DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+                Persona::truncate();
+                Usuario::truncate();
+                DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+                break;
+
+            case 'sqlite':
+                // Temporarily disable FKs for SQLite
+                DB::statement('PRAGMA foreign_keys = OFF;');
+                Persona::truncate();
+                Usuario::truncate();
+                DB::statement('PRAGMA foreign_keys = ON;');
+                break;
+
+            case 'pgsql':
+                // In Postgres, use TRUNCATE ... CASCADE and reset identities
+                DB::statement('TRUNCATE TABLE personas, usuarios RESTART IDENTITY CASCADE;');
+                break;
+
+            default:
+                // Fallback for other drivers
+                Persona::truncate();
+                Usuario::truncate();
+                break;
+        }
+
+        // Now insert your seed data
         $person = Persona::create([
             'nombre'    => 'Admin',
             'apellido'  => 'Principal',
@@ -26,15 +51,13 @@ class UsersSeeder extends Seeder
             'telefono'  => '12345678',
         ]);
 
-        // Crear usuario
         $user = Usuario::create([
             'persona_id' => $person->id,
-            'username'  => 'admin',
-            'password'  => Hash::make('password'),
-            'area_id'   => 1,
+            'username'   => 'admin',
+            'password'   => Hash::make('password'),
+            'area_id'    => 1,
         ]);
 
-        // Asignar rol de admin
         $user->assignRole('admin');
     }
 }
