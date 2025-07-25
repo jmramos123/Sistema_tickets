@@ -20,6 +20,15 @@
             <button wire:click="toggleAtendidos" class="btn {{ $verAtendidos ? 'btn-info' : 'btn-outline-info' }} w-100 mb-2">
                 {{ $verAtendidos ? 'Volver a Turnos' : 'Atendidos' }}
             </button>
+                {{-- Open Tickets Page --}}
+            <a href="{{ route('client.tickets') }}" target="_blank" class="btn btn-outline-warning w-100">
+                🎫 Ver Tickets
+            </a>
+
+            {{-- Open TV Display Page --}}
+            <a href="{{ route('tv.display') }}" target="_blank" class="btn btn-outline-success w-100">
+                📺 Pantalla TV
+            </a>
             <a href="{{ route('user.selectDesk') }}" class="btn btn-outline-light w-100 mb-2">
                 Cambiar escritorio
             </a>
