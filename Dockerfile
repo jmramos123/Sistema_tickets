@@ -24,6 +24,19 @@ ENV REVERB_HOST=127.0.0.1
 ENV REVERB_PORT=6001
 ENV REVERB_SCHEME=http
 
+# 👇 Inject VITE_ environment variables for Vite build
+ARG VITE_PUSHER_APP_KEY
+ARG VITE_PUSHER_APP_CLUSTER
+ARG VITE_PUSHER_HOST
+ARG VITE_PUSHER_PORT
+ARG VITE_PUSHER_SCHEME
+
+ENV VITE_PUSHER_APP_KEY=$VITE_PUSHER_APP_KEY
+ENV VITE_PUSHER_APP_CLUSTER=$VITE_PUSHER_APP_CLUSTER
+ENV VITE_PUSHER_HOST=$VITE_PUSHER_HOST
+ENV VITE_PUSHER_PORT=$VITE_PUSHER_PORT
+ENV VITE_PUSHER_SCHEME=$VITE_PUSHER_SCHEME
+
 # Prevent Laravel from hitting missing SQLite files during build
 ENV CACHE_STORE=array
 ENV SESSION_DRIVER=array
@@ -33,7 +46,7 @@ RUN composer install --no-dev --optimize-autoloader && \
     php artisan config:clear && \
     php artisan cache:clear
 
-# Build frontend assets
+# Build frontend assets (Vite uses the above ENV variables)
 RUN npm install && npm run build
 
 # Set permissions
