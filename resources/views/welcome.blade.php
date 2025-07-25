@@ -45,7 +45,7 @@
 </head>
 <body>
     <div class="welcome-card">
-        <h1>Bienvenido al Sistema de Turnos</h1>
+        <h1>Bienvenido al Sistema de Tickets</h1>
         <p>Por favor inicie sesión para continuar.</p>
         <a href="{{ route('login') }}">Iniciar Sesión</a>
     </div>
