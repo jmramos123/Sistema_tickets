@@ -16,6 +16,10 @@ class TTSController extends Controller
             return response()->json(['error' => 'No text provided'], 400);
         }
 
+        // ✅ Add debug logging here
+        Log::info('Using voice ID', ['voice_id' => env('ELEVENLABS_VOICE_ID')]);
+        Log::info('API Key present?', ['has_key' => !empty(env('ELEVENLABS_API_KEY'))]);
+
         // Log the incoming request for debugging
         Log::info('TTS speak request received', ['text' => $text]);
 
