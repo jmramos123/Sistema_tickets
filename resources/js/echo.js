@@ -15,4 +15,5 @@ window.Echo = new Echo({
     wsPort: import.meta.env.VITE_PUSHER_PORT,
     wssPort: import.meta.env.VITE_PUSHER_PORT,
     enabledTransports: ["ws", "wss"],
+    wsPath: import.meta.env.VITE_PUSHER_PATH || '/reverb',
 });
