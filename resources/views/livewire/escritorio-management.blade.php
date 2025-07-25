@@ -5,10 +5,16 @@
         <div class="alert alert-success">{{ session('message') }}</div>
     @endif
 
-    <div class="d-flex justify-content-between mb-3">
-        <input type="text" wire:model="search" class="form-control w-25" placeholder="Buscar...">
+    <div class="d-flex justify-content-between mb-3 align-items-center">
+        <div class="d-flex">
+            <input type="text" wire:model.defer="search" class="form-control w-100 me-2" placeholder="Buscar...">
+            <button wire:click="applySearch" class="btn btn-outline-secondary">
+                🔍 Buscar
+            </button>
+        </div>
         <button wire:click="openModal" class="btn btn-primary">Crear Escritorio</button>
     </div>
+
 
     <table class="table table-bordered">
         <thead>

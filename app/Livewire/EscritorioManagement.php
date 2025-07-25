@@ -9,6 +9,8 @@ use Illuminate\Validation\Rule;
 
 class EscritorioManagement extends Component
 {
+    public $search = '';
+
     public $escritorios, $areas;
     public $escritorio_id;
     public $nombre;
@@ -27,9 +29,22 @@ class EscritorioManagement extends Component
 
     public function loadData()
     {
-        $this->escritorios = Escritorio::with('area')->get();
         $this->areas = Area::all();
+        
+        $query = Escritorio::with('area');
+        
+        if (!empty($this->search)) {
+            $query->where('nombre_escritorio', 'like', '%' . $this->search . '%');
+        }
+
+        $this->escritorios = $query->get();
     }
+
+    public function updatedSearch()
+    {
+        $this->loadData();
+    }
+
 
     public function resetInput()
     {
