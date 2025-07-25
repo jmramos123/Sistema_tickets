@@ -15,6 +15,7 @@ window.Echo = new Echo({
     wssPort: import.meta.env.VITE_PUSHER_PORT,
     forceTLS: import.meta.env.VITE_PUSHER_SCHEME === 'https',
     enabledTransports: ['ws', 'wss'],
+    wsPath: import.meta.env.VITE_PUSHER_PATH, // 👈 THIS IS CRUCIAL
     disableStats: true // Optional: reduces other background traffic
 
 });
