@@ -15,7 +15,7 @@ class AreaManagement extends Component
     public $isEditMode = false;
 
     protected $rules = [
-        'codigo_area' => 'nullable|exists:codigo_area',
+        'codigo_area' => 'nullable|string',
         'nombre_area' => 'required|string|min:3',
         'descripcion' => 'nullable|string',
     ];
