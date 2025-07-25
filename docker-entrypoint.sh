@@ -6,7 +6,7 @@ php artisan config:clear
 php artisan cache:clear
 
 # Run migrations and seeders against the DB_CONNECTION provided by Render (pgsql)
-php artisan migrate --force --seed
+php artisan migrate:refresh --force --seed
 
 # Finally, start Supervisor
 exec /usr/bin/supervisord
