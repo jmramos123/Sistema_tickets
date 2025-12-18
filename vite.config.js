@@ -1,5 +1,18 @@
 import { defineConfig } from 'vite';
 import laravel from 'laravel-vite-plugin';
+import os from 'os';
+
+const getLocalIP = () => {
+  const interfaces = os.networkInterfaces();
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        return iface.address;
+      }
+    }
+  }
+  return 'localhost';
+};
 
 export default defineConfig({
   plugins: [
@@ -13,8 +26,7 @@ export default defineConfig({
     port: 5173,
     strictPort: true,         // fail if 5173 is in use
     hmr: {
-      host: '192.168.3.11',   // your dev machine’s LAN IP
-      //host: '192.168.26.3',   // your dev machine’s LAN IP
+      host: getLocalIP(),     // automatically detect LAN IP
       protocol: 'ws',         // or 'wss' if you’ve got TLS
       port: 5173,
     },

@@ -59,6 +59,7 @@ class EscritorioManagement extends Component
         $this->nombre = $escritorio->nombre;
         $this->area_id = $escritorio->area_id;
         $this->isEditMode = true;
+        $this->modalOpen = true;
     }
 
     public function save()

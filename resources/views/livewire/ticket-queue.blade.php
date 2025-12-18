@@ -46,7 +46,7 @@
     <div class="p-4" style="margin-left: 220px;">
 
         <h2 class="mb-4">
-            {{ $verAtendidos ? 'Tickets Atendidos' : 'Área Actual: ' . $areas->find($areaId)->nombre_area }}
+            {{ $verAtendidos ? 'Tickets Atendidos' : 'Área Actual: ' . ($areas->find($areaId)->nombre_area ?? 'Sin área asignada') }}
         </h2>
 
         @if($verAtendidos)
