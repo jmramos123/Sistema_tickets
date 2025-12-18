@@ -2,23 +2,42 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Seeder;
-use App\Models\Usuario;
+use Illuminate\Support\Facades\DB;
 use App\Models\Persona;
-use Spatie\Permission\Models\Role;
+use App\Models\Usuario;
 use Illuminate\Support\Facades\Hash;
 
 class UsersSeeder extends Seeder
 {
     public function run(): void
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
-        DB::table('usuarios')->truncate();
-        DB::table('personas')->truncate();
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        $driver = DB::getDriverName();
 
-        // Crear persona asociada
+        // **Skip seeding on SQLite** so it won't error out there:
+        if ($driver === 'sqlite') {
+            return;
+        }
+
+        switch ($driver) {
+            case 'mysql':
+                DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+                Persona::truncate();
+                Usuario::truncate();
+                DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+                break;
+
+            case 'pgsql':
+                DB::statement('TRUNCATE TABLE personas, usuarios RESTART IDENTITY CASCADE;');
+                break;
+
+            default:
+                Persona::truncate();
+                Usuario::truncate();
+                break;
+        }
+
+        // Now insert your seed data
         $person = Persona::create([
             'nombre'    => 'Admin',
             'apellido'  => 'Principal',
@@ -26,15 +45,13 @@ class UsersSeeder extends Seeder
             'telefono'  => '12345678',
         ]);
 
-        // Crear usuario
         $user = Usuario::create([
             'persona_id' => $person->id,
-            'username'  => 'admin',
-            'password'  => Hash::make('password'),
-            'area_id'   => 1,
+            'username'   => 'admin',
+            'password'   => Hash::make('password'),
+            'area_id'    => 1,
         ]);
 
-        // Asignar rol de admin
         $user->assignRole('admin');
     }
 }

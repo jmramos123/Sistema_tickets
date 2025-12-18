@@ -1,31 +1,43 @@
 <x-layouts.app :title="__('Bienvenido Administrador')">
-    <div class="flex flex-col items-center justify-center text-center py-24 px-4 bg-white">
-        <h1 class="text-6xl font-extrabold mb-6 text-gray-900">
+    <div class="container py-5 text-center bg-white">
+        <h1 class="display-3 fw-bold mb-4 text-dark">
             👋 ¡Bienvenido, Administrador!
         </h1>
-        <p class="text-xl text-gray-700 mb-12 max-w-3xl">
+        <p class="fs-4 text-secondary mb-5 mx-auto" style="max-width: 800px;">
             Este es tu espacio de control para gestionar todo el sistema de turnos y pantallas informativas.
             Siéntete libre de navegar, configurar y personalizar todo a tu manera.
         </p>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 w-full max-w-5xl">
-            <div class="bg-gradient-to-br from-blue-500 to-indigo-600 p-8 rounded-xl text-black shadow-lg">
-                <h2 class="text-2xl font-semibold mb-2">⚙️ Configuración</h2>
-                <p class="text-sm opacity-90">Administra las áreas, escritorios y usuarios.</p>
+        <div class="row g-4 justify-content-center">
+            <div class="col-12 col-md-4">
+                <div class="card shadow-lg border-0 h-100" style="background: linear-gradient(to bottom right, #3b82f6, #6366f1); color: black;">
+                    <div class="card-body">
+                        <h2 class="h4 fw-semibold mb-2">⚙️ Configuración</h2>
+                        <p class="small opacity-75 mb-0">Administra las áreas, escritorios y usuarios.</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="bg-gradient-to-br from-emerald-500 to-teal-600 p-8 rounded-xl text-black shadow-lg">
-                <h2 class="text-2xl font-semibold mb-2">🎥 Videos en TV</h2>
-                <p class="text-sm opacity-90">Controla y sube los videos publicitarios del sistema.</p>
+            <div class="col-12 col-md-4">
+                <div class="card shadow-lg border-0 h-100" style="background: linear-gradient(to bottom right, #10b981, #0d9488); color: black;">
+                    <div class="card-body">
+                        <h2 class="h4 fw-semibold mb-2">🎥 Videos en TV</h2>
+                        <p class="small opacity-75 mb-0">Controla y sube los videos publicitarios del sistema.</p>
+                    </div>
+                </div>
             </div>
 
-            <div class="bg-gradient-to-br from-rose-500 to-pink-600 p-8 rounded-xl text-black shadow-lg">
-                <h2 class="text-2xl font-semibold mb-2">🎫 Turnos</h2>
-                <p class="text-sm opacity-90">Emisión y seguimiento de tickets en tiempo real.</p>
+            <div class="col-12 col-md-4">
+                <div class="card shadow-lg border-0 h-100" style="background: linear-gradient(to bottom right, #f43f5e, #ec4899); color: black;">
+                    <div class="card-body">
+                        <h2 class="h4 fw-semibold mb-2">🎫 Turnos</h2>
+                        <p class="small opacity-75 mb-0">Emisión y seguimiento de tickets en tiempo real.</p>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <div class="mt-16 text-gray-500 text-sm">
+        <div class="mt-5 text-muted small">
             &copy; {{ date('Y') }} Sistema de Gestión de Tickets — UGE.
         </div>
     </div>

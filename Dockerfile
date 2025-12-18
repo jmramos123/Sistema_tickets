@@ -1,0 +1,71 @@
+# Stage 1: Build assets and install PHP deps
+FROM php:8.3-fpm AS build
+
+RUN apt-get update && apt-get install -y \
+    git curl zip unzip libpng-dev libonig-dev libxml2-dev libzip-dev \
+    libpq-dev libsqlite3-dev nodejs npm nginx supervisor \
+ && docker-php-ext-install pdo pdo_pgsql pgsql zip pcntl
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+WORKDIR /var/www
+
+COPY . .
+
+# Remove the local .env so Laravel picks up only the Render‐provided environment variables
+RUN rm -f /var/www/.env
+
+# Add dummy envs to avoid null error in artisan
+ENV REVERB_APP_KEY=local
+ENV REVERB_APP_SECRET=local
+ENV REVERB_APP_ID=local
+ENV REVERB_HOST=127.0.0.1
+ENV REVERB_PORT=6001
+ENV REVERB_SCHEME=http
+
+# 👇 Inject VITE_ environment variables for Vite build
+ARG VITE_PUSHER_APP_KEY
+ARG VITE_PUSHER_APP_CLUSTER
+ARG VITE_PUSHER_HOST
+ARG VITE_PUSHER_PORT
+ARG VITE_PUSHER_SCHEME
+ARG VITE_PUSHER_PATH
+
+ENV VITE_PUSHER_APP_KEY=$VITE_PUSHER_APP_KEY
+ENV VITE_PUSHER_APP_CLUSTER=$VITE_PUSHER_APP_CLUSTER
+ENV VITE_PUSHER_HOST=$VITE_PUSHER_HOST
+ENV VITE_PUSHER_PORT=$VITE_PUSHER_PORT
+ENV VITE_PUSHER_SCHEME=$VITE_PUSHER_SCHEME
+ENV VITE_PUSHER_PATH=$VITE_PUSHER_PATH
+
+# Prevent Laravel from hitting missing SQLite files during build
+ENV CACHE_STORE=array
+ENV SESSION_DRIVER=array
+
+# Install PHP dependencies
+RUN composer install --no-dev --optimize-autoloader && \
+    php artisan config:clear && \
+    php artisan cache:clear
+
+# Build frontend assets (Vite uses the above ENV variables)
+RUN npm install && npm run build
+
+# Set permissions
+RUN chown -R www-data:www-data /var/www
+
+# Copy NGINX config
+COPY nginx.conf /etc/nginx/nginx.conf
+
+# Copy Supervisor config
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Copy entrypoint script and make executable
+COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
+RUN chmod +x /usr/local/bin/docker-entrypoint.sh
+
+# Expose HTTP port
+EXPOSE 80
+
+# Use entrypoint to run migrations before starting services
+ENTRYPOINT ["docker-entrypoint.sh"]

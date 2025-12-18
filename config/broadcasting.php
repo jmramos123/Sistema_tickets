@@ -1,5 +1,15 @@
 <?php
 
+// Auto-detect local IP address
+function getBroadcastIP() {
+    $localIP = gethostbyname(gethostname());
+    // Check if it's a valid local IP (starts with 192.168, 10., or 172.)
+    if (preg_match('/^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)/', $localIP)) {
+        return $localIP;
+    }
+    return '127.0.0.1';
+}
+
 return [
 
     /*
@@ -36,10 +46,11 @@ return [
             'secret' => env('REVERB_APP_SECRET'),
             'app_id' => env('REVERB_APP_ID'),
             'options' => [
-                'host' => env('REVERB_HOST'),
+                'host' => env('REVERB_HOST') ?: getBroadcastIP(),
                 'port' => env('REVERB_PORT', 443),
                 'scheme' => env('REVERB_SCHEME', 'https'),
                 'useTLS' => env('REVERB_SCHEME', 'https') === 'https',
+                'path' => env('REVERB_PATH', '/reverb'), // key part
             ],
             'client_options' => [
                 // Guzzle client options: https://docs.guzzlephp.org/en/stable/request-options.html

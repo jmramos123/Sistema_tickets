@@ -15,7 +15,7 @@ class AreaManagement extends Component
     public $isEditMode = false;
 
     protected $rules = [
-        'codigo_area' => 'nullable|exists:codigo_area',
+        'codigo_area' => 'nullable|string',
         'nombre_area' => 'required|string|min:3',
         'descripcion' => 'nullable|string',
     ];
@@ -41,13 +41,15 @@ class AreaManagement extends Component
         $this->reset(['codigo_area', 'nombre_area', 'descripcion', 'isEditMode', 'selectedArea']);
     }
 
-    public function edit(Area $area)
+    public function edit($id)
     {
+        $area = Area::findOrFail($id);
         $this->selectedArea = $area;
         $this->codigo_area = $area->codigo_area;
         $this->nombre_area = $area->nombre_area;
         $this->descripcion = $area->descripcion;
         $this->isEditMode = true;
+        $this->modalOpen = true;
     }
 
     public function applySearch()
@@ -95,8 +97,9 @@ class AreaManagement extends Component
 
     }
 
-    public function delete(Area $area)
+    public function delete($id)
     {
+        $area = Area::findOrFail($id);
         $area->delete();
         session()->flash('message', 'Área eliminada correctamente.');
         $this->loadAreas();

@@ -46,7 +46,7 @@ class UserManagement extends Component
         return [
             'nombre' => 'required|string|min:2',
             'apellido' => 'required|string|min:2',
-            'telefono' => 'nullable|string',
+            'telefono' => 'required|string',
             'email' => 'required|email|unique:personas,email' . ($this->isEditMode ? ',' . $this->selectedUsuario->persona_id : ''),
             'username' => $usernameRule,
             'password' => $passwordRule,

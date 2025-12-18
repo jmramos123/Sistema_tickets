@@ -1,5 +1,15 @@
 <?php
 
+// Auto-detect local IP address
+function getLocalIP() {
+    $localIP = gethostbyname(gethostname());
+    // Check if it's a valid local IP (starts with 192.168, 10., or 172.)
+    if (preg_match('/^(192\.168\.|10\.|172\.(1[6-9]|2[0-9]|3[01])\.)/', $localIP)) {
+        return $localIP;
+    }
+    return '127.0.0.1';
+}
+
 return [
 
     /*
@@ -32,7 +42,7 @@ return [
             'host' => env('REVERB_SERVER_HOST', '0.0.0.0'),
             'port' => env('REVERB_SERVER_PORT', 6001),
             'path' => env('REVERB_SERVER_PATH', ''),
-            'hostname' => env('REVERB_HOST'),
+            'hostname' => env('REVERB_HOST') ?: getLocalIP(),
             'options' => [
                 'tls' => [],
             ],

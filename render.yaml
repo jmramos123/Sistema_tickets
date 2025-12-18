@@ -1,0 +1,104 @@
+services:
+  - type: web
+    name: laravel-app
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    envVars:
+      # Laravel environment
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        generateValue: true
+      - key: APP_DEBUG
+        value: false
+      - key: BROADCAST_CONNECTION
+        value: reverb
+
+      # Reverb (socket server) — Supervisor + NGINX proxy in same container
+      - key: REVERB_APP_ID
+        value: local
+      - key: REVERB_APP_KEY
+        value: local
+      - key: REVERB_APP_SECRET
+        value: local
+      - key: REVERB_HOST
+        value: 127.0.0.1
+      - key: REVERB_PORT
+        value: 6001
+      - key: REVERB_SCHEME
+        value: http
+      - key: REVERB_PATH
+        value: /reverb
+      - key: REVERB_DISABLE_SIGNALS
+        value: true
+
+      # Database (Postgres)
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        value: dpg-d20g9l3uibrs7386gkd0-a
+      - key: DB_PORT
+        value: 5432
+      - key: DB_DATABASE
+        value: tickets_db_7s1d
+      - key: DB_USERNAME
+        value: tickets_db_7s1d_user
+      - key: DB_PASSWORD
+        value: DL0DJrogkILluKqZXmW9D8z95wlt1rL4
+
+      # Vite/Echo (runs in the browser)
+      - key: VITE_PUSHER_APP_KEY
+        value: local
+      - key: VITE_PUSHER_APP_CLUSTER
+        value: mt1
+      - key: VITE_PUSHER_HOST
+        value: sistema-tickets-1-jh6x.onrender.com
+      - key: VITE_PUSHER_PORT
+        value: 443
+      - key: VITE_PUSHER_SCHEME
+        value: https
+      - key: VITE_PUSHER_PATH
+        value: /reverb
+
+  - type: worker
+    name: queue-worker
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    startCommand: php artisan queue:work --sleep=3 --tries=3
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_KEY
+        generateValue: true
+      - key: BROADCAST_CONNECTION
+        value: reverb
+
+      # Reverb credentials (for jobs)
+      - key: REVERB_APP_ID
+        value: local
+      - key: REVERB_APP_KEY
+        value: local
+      - key: REVERB_APP_SECRET
+        value: local
+      - key: REVERB_HOST
+        value: 127.0.0.1
+      - key: REVERB_PORT
+        value: 6001
+      - key: REVERB_SCHEME
+        value: http
+
+      # Database (Postgres)
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        value: dpg-d20g9l3uibrs7386gkd0-a
+      - key: DB_PORT
+        value: 5432
+      - key: DB_DATABASE
+        value: tickets_db_7s1d
+      - key: DB_USERNAME
+        value: tickets_db_7s1d_user
+      - key: DB_PASSWORD
+        value: DL0DJrogkILluKqZXmW9D8z95wlt1rL4
